@@ -26,26 +26,21 @@ pub mod core {
             self.stories.push(str.to_string());
         }
 
+        fn get_names(filenames: &Vec<String>) -> Vec<&str> {
+            filenames
+                .iter()
+                .map(|c| {
+                    let split_str: Vec<&str> = c.split(".").collect();
+                    split_str[0]
+                })
+                .collect()
+        }
+
         fn get_matches(&self) -> Vec<(String, String)> {
-            let components: Vec<&str> = self
-                .components
-                .iter()
-                .map(|c| {
-                    let split_str: Vec<&str> = c.split(".").collect();
-                    split_str[0]
-                })
-                .collect();
-
-            let stories: Vec<&str> = self
-                .stories
-                .iter()
-                .map(|c| {
-                    let split_str: Vec<&str> = c.split(".").collect();
-                    split_str[0]
-                })
-                .collect();
-
+            let components = Matcher::get_names(&self.components);
+            let stories = Matcher::get_names(&self.stories);
             let mut result: Vec<(String, String)> = vec![];
+
             for component in components {
                 let story = stories.iter().find(|&story| **story == *component);
                 if let Some(story) = story {
@@ -93,17 +88,15 @@ pub mod core {
 }
 
 pub mod react {
+    use regex::Regex;
+
     pub fn is_jsx(filename: &str) -> bool {
-        if filename == "index.ts" || filename == "index.tsx" {
-            return false;
-        }
-        filename.ends_with(".tsx") || filename.ends_with(".jsx")
+        let re = Regex::new(r"\.react\.tsx$|\.react.ts$|\.tsx$").unwrap();
+        re.is_match(filename)
     }
 
     pub fn is_storybook(filename: &str) -> bool {
-        if filename == "index.stories.ts" || filename == "index.stories.tsx" {
-            return false;
-        }
-        filename.ends_with(".stories.ts") || filename.ends_with(".stories.tsx")
+        let re = Regex::new(r"\.stories\.tsx$|\.stories.ts$").unwrap();
+        re.is_match(filename)
     }
 }
